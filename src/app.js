@@ -242,7 +242,6 @@ function renderSummary(result) {
     ["Helix", countCodes(result.summary.counts, ["H", "G", "I", "P"])],
     ["Sheet", countCodes(result.summary.counts, ["E", "B"])],
     ["Loop", result.summary.counts["-"] ?? 0],
-    ["ASA", formatSummaryAsa(result.summary.asaTotal)],
     ["Mean RSA", formatPercent(result.summary.meanRsa)]
   ];
 
