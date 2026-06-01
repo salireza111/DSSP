@@ -1,0 +1,13 @@
+{
+  "name": "simple-dssp-js",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.mjs",
+    "validate:mkdssp": "node scripts/validate-mkdssp.mjs assets/1YIO.pdb",
+    "dssp": "python3 scripts/dssp_tools.py",
+    "benchmark:dssp": "python3 scripts/dssp_tools.py benchmark assets/1YIO.pdb",
+    "serve": "python3 -m http.server 4173"
+  }
+}

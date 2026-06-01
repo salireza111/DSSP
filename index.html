@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple DSSP</title>
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="apple-touch-icon" href="./favicon.png">
+    <link rel="stylesheet" href="./src/styles.css">
+    <script defer src="https://3Dmol.org/build/3Dmol-min.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>Simple DSSP</h1>
+          <p>A static, browser-side JavaScript implementation of DSSP-compatible secondary-structure and accessibility assignment for legacy PDB files.</p>
+        </div>
+        <div class="top-actions" aria-label="Export actions">
+          <button id="export-csv" type="button" disabled>Export CSV</button>
+          <button id="export-json" type="button" disabled>Export JSON</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="input-panel">
+          <div class="panel-header">
+            <h2>Input</h2>
+            <button id="load-demo" type="button">Load Demo</button>
+          </div>
+
+          <div class="control-grid">
+            <div id="drop-zone" class="drop-zone">
+              <input id="pdb-file" type="file" accept=".pdb,.ent,.txt">
+              <div>
+                <strong>Drop a PDB file here</strong>
+                <span>or click to select one from disk</span>
+              </div>
+            </div>
+
+            <label class="field" for="pdb-text">
+              <span>PDB text</span>
+              <textarea id="pdb-text" spellcheck="false" placeholder="Paste ATOM records here..."></textarea>
+            </label>
+
+            <label class="inline-field" for="hbond-cutoff">
+              <span>H-bond cutoff</span>
+              <input id="hbond-cutoff" type="number" step="0.1" value="-0.5">
+              <span>kcal/mol</span>
+            </label>
+
+            <div class="button-row">
+              <button id="run-analysis" class="primary" type="button">Calculate</button>
+              <button id="clear-input" type="button">Clear</button>
+            </div>
+
+            <form id="pdb-fetch-form" class="pdb-fetch">
+              <div class="pdb-fetch-title">
+                <strong>Download from PDB</strong>
+                <span>Legacy PDB format</span>
+              </div>
+              <div class="pdb-fetch-row">
+                <label class="sr-only" for="pdb-code">PDB ID</label>
+                <input id="pdb-code" type="text" inputmode="latin" autocomplete="off" autocapitalize="characters" maxlength="4" placeholder="1YIO">
+                <label class="sr-only" for="pdb-chain">Chain ID</label>
+                <input id="pdb-chain" type="text" inputmode="latin" autocomplete="off" autocapitalize="characters" maxlength="1" placeholder="Chain">
+                <button id="fetch-pdb" type="submit">Fetch PDB</button>
+              </div>
+            </form>
+          </div>
+
+          <p id="status" class="status" data-type="idle">Paste a PDB file or drop one into the page.</p>
+        </aside>
+
+        <section class="results-panel" aria-live="polite">
+          <div class="panel-header">
+            <h2>Results</h2>
+            <span class="hint">Codes: H G I P E B T S -</span>
+          </div>
+
+          <div id="summary" class="metric-grid"></div>
+          <div id="sequence" class="sequence-strip" aria-label="Residue sequence with secondary structure colors"></div>
+
+          <div class="table-wrap">
+            <table id="residue-table">
+              <thead>
+                <tr>
+                  <th>dssp_index</th>
+                  <th>chain</th>
+                  <th>residue_number</th>
+                  <th>insertion_code</th>
+                  <th>aa</th>
+                  <th>structure</th>
+                  <th>structure_name</th>
+                  <th>bridge_1</th>
+                  <th>bridge_2</th>
+                  <th>asa</th>
+                  <th>rsa</th>
+                  <th>phi</th>
+                  <th>psi</th>
+                  <th>kappa</th>
+                  <th>alpha</th>
+                  <th>tco</th>
+                  <th>x_ca</th>
+                  <th>y_ca</th>
+                  <th>z_ca</th>
+                  <th>nh_o_1_offset</th>
+                  <th>nh_o_1_energy</th>
+                  <th>nh_o_2_offset</th>
+                  <th>nh_o_2_energy</th>
+                  <th>o_hn_1_offset</th>
+                  <th>o_hn_1_energy</th>
+                  <th>o_hn_2_offset</th>
+                  <th>o_hn_2_energy</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="legend">
+            <span><i class="swatch helix"></i>Helix</span>
+            <span><i class="swatch sheet"></i>Sheet</span>
+            <span><i class="swatch turn"></i>Turn</span>
+            <span><i class="swatch ppii"></i>PPII</span>
+            <span><i class="swatch bend"></i>Bend</span>
+            <span><i class="swatch loop"></i>Loop</span>
+          </div>
+        </section>
+      </section>
+
+      <footer class="site-footer" aria-label="Project links">
+        <a href="https://github.com/salireza111" target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+            <path d="M9 18c-4.51 2-5-2-7-2"/>
+          </svg>
+          <span>GitHub</span>
+        </a>
+        <a href="https://salireza111.github.io/Myblog/" target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 7v14"/>
+            <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>
+          </svg>
+          <span>Blog</span>
+        </a>
+        <a href="https://github.com/salireza111/DSSP" target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="18" cy="18" r="3"/>
+            <circle cx="6" cy="6" r="3"/>
+            <path d="M6 9v12"/>
+            <path d="M15.5 18H9a3 3 0 0 1-3-3"/>
+            <path d="M18 15v-5a3 3 0 0 0-3-3H9"/>
+          </svg>
+          <span>salireza111/DSSP</span>
+        </a>
+      </footer>
+    </main>
+
+    <div id="residue-viewer" class="residue-viewer" role="tooltip" hidden>
+      <div class="viewer-head">
+        <strong id="viewer-title">Residue</strong>
+        <span id="viewer-structure">loop</span>
+      </div>
+      <label class="viewer-option">
+        <input id="viewer-ribbon-toggle" type="checkbox">
+        <span>Highlight ribbon</span>
+      </label>
+      <div class="viewer-tools" aria-label="Viewer overlays">
+        <button id="viewer-angle-toggle" type="button" aria-pressed="true">Phi/Psi</button>
+        <button id="viewer-hbond-toggle" type="button" aria-pressed="false">DSSP H-bonds</button>
+      </div>
+      <div id="viewer-mol" class="viewer-mol-surface" aria-label="Focused residue 3D view"></div>
+      <div id="viewer-caption" class="viewer-caption"></div>
+    </div>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
